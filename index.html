@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôi không...</title>
+
+    <!-- Tải font tiếng Việt Be Vietnam Pro & Inter từ Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Cấu hình Tailwind cho font chữ và hiệu ứng rung khi nhập sai -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Be Vietnam Pro"', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                    keyframes: {
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '20%': { transform: 'translateX(-6px)' },
+                            '40%': { transform: 'translateX(6px)' },
+                            '60%': { transform: 'translateX(-4px)' },
+                            '80%': { transform: 'translateX(4px)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    },
+                    animation: {
+                        shake: 'shake 0.4s ease-in-out',
+                        fadeIn: 'fadeIn 0.35s ease-out forwards',
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/60 to-indigo-50/70 text-slate-800 font-sans antialiased flex items-center justify-center p-4 sm:p-6 selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Thẻ nội dung chính -->
+    <main class="w-full max-w-md bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl shadow-slate-200/70 border border-slate-100 p-6 sm:p-8 animate-fadeIn">
+        
+        <!-- Biểu tượng và tiêu đề chính -->
+        <div class="flex flex-col items-center text-center mb-6">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center mb-4 shadow-sm">
+                <!-- Biểu tượng ổ khóa nhẹ nhàng -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+                Ôi không...
+            </h1>
+            <p class="mt-2 text-sm sm:text-base text-slate-500 leading-relaxed">
+                Bạn cần vượt qua câu hỏi nhỏ này để tiếp tục.
+            </p>
+        </div>
+
+        <!-- Form xác minh -->
+        <form id="verifyForm" class="space-y-5" novalidate>
+            <div class="space-y-2.5">
+                <label for="dateInput" class="block text-center text-base sm:text-lg font-semibold text-slate-800">
+                    Nhập ngày sinh của thầy Nguyễn Tấn Hưng?
+                </label>
+
+                <!-- Ô nhập ngày sinh -->
+                <div class="relative">
+                    <input
+                        type="text"
+                        id="dateInput"
+                        name="dateInput"
+                        placeholder="dd/mm/yyyy"
+                        inputmode="numeric"
+                        maxlength="10"
+                        autocomplete="off"
+                        autocorrect="off"
+                        spellcheck="false"
+                        aria-label="Nhập ngày sinh theo định dạng ngày/tháng/năm"
+                        class="w-full px-4 py-3.5 text-center text-xl sm:text-2xl font-semibold tracking-widest text-slate-900 placeholder:text-slate-300 placeholder:font-normal bg-slate-50/80 border-2 border-slate-200 rounded-2xl focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all duration-200"
+                    >
+                </div>
+            </div>
+
+            <!-- Khu vực hiển thị thông báo lỗi hoặc thành công -->
+            <div id="statusBox" class="hidden rounded-2xl px-4 py-3 text-sm sm:text-base font-medium transition-all duration-200" role="alert" aria-live="polite">
+                <div class="flex items-center justify-center gap-2.5 text-center">
+                    <!-- Biểu tượng loading khi xác minh thành công -->
+                    <svg id="loadingSpinner" class="hidden animate-spin h-5 w-5 text-emerald-600 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span id="statusMessage"></span>
+                </div>
+            </div>
+
+            <!-- Nút xác minh -->
+            <button
+                type="submit"
+                id="submitBtn"
+                class="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white font-semibold text-base sm:text-lg shadow-md shadow-indigo-200 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+            >
+                Xác minh
+            </button>
+        </form>
+    </main>
+
+    <script>
+        (function () {
+            "use strict";
+
+            // =====================================================================
+            // ĐƯỜNG DẪN ĐÍCH: Thay đổi đường dẫn bên dưới thành link bạn muốn chuyển tới
+            // =====================================================================
+            const TARGET_URL = "https://example.com";
+
+            // Giá trị băm dùng để đối chiếu bảo mật
+            const EXPECTED_HASH = 403390283;
+            const EXPECTED_LENGTH = 10;
+
+            // Các phần tử DOM
+            const form = document.getElementById("verifyForm");
+            const dateInput = document.getElementById("dateInput");
+            const submitBtn = document.getElementById("submitBtn");
+            const statusBox = document.getElementById("statusBox");
+            const statusMessage = document.getElementById("statusMessage");
+            const loadingSpinner = document.getElementById("loadingSpinner");
+
+            // Lưu giá trị trước đó để xử lý thao tác xóa (Backspace) mượt mà
+            let previousValue = "";
+
+            /**
+             * Tính mã băm từ chuỗi đầu vào.
+             * @param {string} str - Chuỗi cần tính mã băm.
+             * @returns {number} Giá trị mã băm.
+             */
+            function computeHash(str) {
+                let h = 7;
+                for (let i = 0; i < str.length; i++) {
+                    h = (h * 31 + str.charCodeAt(i)) % 1000000007;
+                }
+                return h;
+            }
+
+            /**
+             * Định dạng chuỗi chữ số sang dạng dd/mm/yyyy.
+             * Khi đang gõ thêm: tự động chèn dấu "/" sau 2 số đầu và sau 4 số đầu.
+             * Khi đang xóa: không ép thêm dấu "/" ở cuối để tránh bị kẹt con trỏ.
+             *
+             * @param {string} rawValue - Giá trị hiện tại của ô nhập.
+             * @param {boolean} isDeleting - Cờ cho biết người dùng đang xóa ký tự.
+             * @returns {string} Chuỗi đã được định dạng.
+             */
+            function formatDateInput(rawValue, isDeleting) {
+                // Chỉ giữ lại các ký tự chữ số (tối đa 8 chữ số cho dd, mm, yyyy)
+                const digits = rawValue.replace(/\D/g, "").slice(0, 8);
+                const len = digits.length;
+
+                if (len === 0) {
+                    return "";
+                }
+
+                if (len < 2) {
+                    return digits;
+                }
+
+                if (len === 2) {
+                    return isDeleting ? digits : digits + "/";
+                }
+
+                if (len < 4) {
+                    return digits.slice(0, 2) + "/" + digits.slice(2);
+                }
+
+                if (len === 4) {
+                    const formatted = digits.slice(0, 2) + "/" + digits.slice(2, 4);
+                    return isDeleting ? formatted : formatted + "/";
+                }
+
+                return digits.slice(0, 2) + "/" + digits.slice(2, 4) + "/" + digits.slice(4);
+            }
+
+            /**
+             * Ẩn thông báo trạng thái và khôi phục viền mặc định cho ô nhập.
+             */
+            function clearStatus() {
+                statusBox.classList.add("hidden");
+                statusBox.classList.remove(
+                    "bg-red-50", "text-red-700", "border", "border-red-200",
+                    "bg-emerald-50", "text-emerald-700", "border-emerald-200"
+                );
+                loadingSpinner.classList.add("hidden");
+                dateInput.classList.remove("border-red-400", "focus:border-red-500", "focus:ring-red-100");
+                dateInput.classList.add("border-slate-200", "focus:border-indigo-500", "focus:ring-indigo-100");
+            }
+
+            /**
+             * Hiển thị thông báo lỗi và tạo hiệu ứng rung nhẹ cho ô nhập liệu.
+             * @param {string} message - Nội dung lỗi.
+             */
+            function showError(message) {
+                clearStatus();
+
+                statusMessage.textContent = message;
+                statusBox.classList.remove("hidden");
+                statusBox.classList.add("bg-red-50", "text-red-700", "border", "border-red-200");
+
+                dateInput.classList.remove("border-slate-200", "focus:border-indigo-500", "focus:ring-indigo-100");
+                dateInput.classList.add("border-red-400", "focus:border-red-500", "focus:ring-red-100");
+
+                // Khởi chạy lại hiệu ứng rung mỗi lần trả lời sai
+                dateInput.classList.remove("animate-shake");
+                void dateInput.offsetWidth;
+                dateInput.classList.add("animate-shake");
+                dateInput.focus();
+            }
+
+            /**
+             * Hiển thị thông báo thành công kèm biểu tượng loading và vô hiệu hóa form.
+             * @param {string} message - Nội dung thông báo thành công.
+             */
+            function showSuccess(message) {
+                clearStatus();
+
+                statusMessage.textContent = message;
+                loadingSpinner.classList.remove("hidden");
+                statusBox.classList.remove("hidden");
+                statusBox.classList.add("bg-emerald-50", "text-emerald-700", "border", "border-emerald-200");
+
+                dateInput.classList.remove("border-slate-200", "focus:border-indigo-500", "focus:ring-indigo-100");
+                dateInput.classList.add("border-emerald-400", "bg-emerald-50/40", "text-emerald-900");
+
+                dateInput.disabled = true;
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Đang chuyển hướng...";
+            }
+
+            // Lắng nghe sự kiện nhập liệu để tự động định dạng ngày/tháng/năm
+            dateInput.addEventListener("input", function (event) {
+                try {
+                    const currentValue = dateInput.value;
+                    const inputType = event.inputType || "";
+                    const isDeleting = inputType.startsWith("delete") || currentValue.length < previousValue.length;
+
+                    const formattedValue = formatDateInput(currentValue, isDeleting);
+                    dateInput.value = formattedValue;
+                    previousValue = formattedValue;
+
+                    // Xóa thông báo lỗi ngay khi người dùng bắt đầu chỉnh sửa lại
+                    if (!statusBox.classList.contains("hidden") && !dateInput.disabled) {
+                        clearStatus();
+                    }
+                } catch (err) {
+                    console.error("Lỗi khi định dạng dữ liệu nhập:", err);
+                }
+            });
+
+            // Lắng nghe sự kiện gửi form (nhấn nút Xác minh hoặc nhấn Enter)
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                try {
+                    const userInput = dateInput.value.trim();
+
+                    if (userInput.length === EXPECTED_LENGTH && computeHash(userInput) === EXPECTED_HASH) {
+                        showSuccess("Xác minh thành công, đang chuyển hướng đến đường dẫn mới!");
+
+                        // Chuyển hướng sau 1.5 giây
+                        setTimeout(function () {
+                            window.location.href = TARGET_URL;
+                        }, 1500);
+                    } else {
+                        showError("Chưa đúng rồi, hãy thử lại nhé!");
+                    }
+                } catch (err) {
+                    console.error("Lỗi trong quá trình xác minh:", err);
+                    showError("Đã xảy ra lỗi nhỏ, vui lòng thử lại!");
+                }
+            });
+
+            // Tự động đặt con trỏ vào ô nhập khi tải trang xong
+            window.addEventListener("load", function () {
+                dateInput.focus();
+            });
+        })();
+    </script>
+</body>
+</html>
